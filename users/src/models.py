@@ -12,4 +12,3 @@ class User(Base):
     **password_hash = Column(String(128), nullable=False)**
     **is_active = Column(Boolean, default=True)**
 
-    # Define las relaciones entre los modelos, si las hay
