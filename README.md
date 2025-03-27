@@ -34,11 +34,7 @@ Las contribuciones al desarrollo de la Plataforma Central de Alphapp son bienven
 
 ## Licencia
 
-[Incluir aquí la licencia bajo la que se distribuye el código. Por ejemplo:]
+Apache, versión 2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
-MIT License
-
-Copyright (c) [año] [Nombre del propietario del copyright]
-
-[Enlace al archivo de licencia completo]
-```
+Copyright (c) 2025 Fast677
