@@ -1,0 +1,17 @@
+name: alphapp_xyz_env
+channels:
+  - defaults
+dependencies:
+  - python=3.9
+  - pip
+  - flask  # Ejemplo de una posible dependencia
+  - sqlalchemy # Otro ejemplo
+  - pandas # Podría ser una dependencia del microservicio de análisis de datos
+  - tensorflow # También para el microservicio de análisis de datos
+  - matplotlib
+  - seaborn
+  - pytest
+  - pip:
+    - requests
+    - python-dotenv
+    # Otras dependencias específicas de pip que no están en los canales de conda
