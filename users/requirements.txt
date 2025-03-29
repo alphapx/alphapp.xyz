@@ -1,1 +1,35 @@
+# Framework web (ejemplo: Flask o Django Rest Framework)
+flask
+# o
+# djangorestframework
 
+# ORM para la gestión de la base de datos (ejemplo: SQLAlchemy o Django ORM)
+sqlalchemy
+# o (si se usa Django)
+# django
+
+# Serializador para la API (ejemplo: Marshmallow o integrado en Django Rest Framework)
+marshmallow
+
+# Autenticación y Autorización con JWT
+PyJWT
+python-jose[cryptography]
+
+# Autenticación y Autorización con OAuth 2.0 (dependiendo de la implementación)
+# oauthlib
+# requests-oauthlib
+
+# Librería para realizar peticiones HTTP (si es necesario interactuar con otros servicios)
+requests
+
+# Librería para pruebas
+pytest
+pytest-cov
+
+# Utilidades y otras dependencias comunes
+python-dotenv
+# psycopg2  # Si se utiliza PostgreSQL
+# mysqlclient # Si se utiliza MySQL
+
+# Logging
+logging
