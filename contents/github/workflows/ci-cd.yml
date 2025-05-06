@@ -1,10 +1,3 @@
-Basándome en la información proporcionada en las fuentes, puedo presentarte el contenido de un archivo `ci-cd.yml` que se encontraría en la ruta `alphapp.xyz/content/github/workflows/`, utilizado para la Integración Continua/Entrega Continua (CI/CD) con GitHub Actions para el microservicio de gestión de contenidos.
-
-Este archivo define un **flujo de trabajo de CI/CD** que se activa cuando se confirman cambios en la rama principal (`main`). El pipeline consta de varias etapas: construcción (`build`), pruebas (`test`), despliegue en desarrollo (`deploy-dev`), despliegue en producción (`deploy-prod`), y un paso de aprobación manual antes del despliegue en producción.
-
-Aquí tienes el contenido del archivo `ci-cd.yml` extraído de las fuentes:
-
-```yaml
 name: CI/CD
 
 on:
