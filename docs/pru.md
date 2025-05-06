@@ -45,4 +45,3 @@ Basado en esto, una estructura *hipotética* (ya que no está definida explícit
         *   `testing.md`
         *   `pull-requests.md`
 
-Es crucial recordar que esta estructura interna es una inferencia lógica basada en los temas mencionados y no está explícitamente detallada en las fuentes proporcionadas. Lo que sí está claramente establecido es el propósito general del repositorio `alphapp.xyz/docs` y el tipo de contenido que debe albergar.
