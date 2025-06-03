@@ -1,141 +1,77 @@
 name: CI/CD
 
 on:
-  **push:**
-    branches: [ **main** ]
+  push:
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
-  **build:**
+  build:
     runs-on: ubuntu-latest
     steps:
-      - name: **Checkout del código**
+      - name: Checkout del código
         uses: actions/checkout@v3
 
-      - name: **Configurar Docker**
+      - name: Configurar Docker
         uses: docker/setup-buildx-action@v2
 
-      - name: **Construir las imágenes Docker de los microservicios**
+      - name: Construir y publicar imágenes Docker
         run: |
-          docker build -t ${{ github.repository }}/users:${{ github.sha }} alphapp.xyz/users/
-          docker build -t ${{ github.repository }}/analytics:${{ github.sha }} alphapp.xyz/analytics/
-          docker build -t ${{ github.repository }}/content:${{ github.sha }} alphapp.xyz/content/
-          docker build -t ${{ github.repository }}/api-gateway:${{ github.sha }} alphapp.xyz/api-gateway/
-          docker push ${{ github.repository }}/users:${{ github.sha }}
-          docker push ${{ github.repository }}/analytics:${{ github.sha }}
-          docker push ${{ github.repository }}/content:${{ github.sha }}
-          docker push ${{ github.repository }}/api-gateway:${{ github.sha }}
-        # NOTA: Se asume que cada microservicio tiene su Dockerfile en su respectiva carpeta.
-        #       Podría ser necesario autenticar con un registro de Docker si es privado.
+          services=(users analytics content api-gateway)
+          for service in "${services[@]}"; do
+            docker build -t ${{ github.repository }}/${service}:${{ github.sha }} alphapp.xyz/${service}/
+            docker push ${{ github.repository }}/${service}:${{ github.sha }}
+          done
 
-  **test:**
+  test:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: **Checkout del código**
+      - name: Checkout del código
         uses: actions/checkout@v3
 
-      - name: **Configurar Python**
+      - name: Configurar Python
         uses: actions/setup-python@v3
         with:
           python-version: '3.x'
 
-      - name: **Instalar dependencias (para pruebas)**
+      - name: Instalar dependencias y ejecutar pruebas
         run: |
-          pip install -r alphapp.xyz/users/requirements.txt
-          pip install -r alphapp.xyz/analytics/requirements.txt
-          # ... (instalar dependencias para otros microservicios si es necesario)
+          services=(users analytics)
+          for service in "${services[@]}"; do
+            pip install -r alphapp.xyz/${service}/requirements.txt
+            pytest alphapp.xyz/${service}/tests/
+          done
 
-      - name: **Ejecutar pruebas unitarias**
-        run: |
-          pytest alphapp.xyz/users/tests/
-          pytest alphapp.xyz/analytics/tests/
-          # ... (ejecutar pruebas para otros microservicios)
-        # NOTA: Se asume el uso de pytest como framework de pruebas en Python.
-
-  **deploy_dev:**
+  deploy:
     needs: test
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        environment: [dev, staging, production]
     steps:
-      - name: **Checkout del código**
+      - name: Checkout del código
         uses: actions/checkout@v3
 
-      - name: **Configurar kubectl**
+      - name: Configurar kubectl
         uses: azure/setup-kubectl@v3
         with:
           install-location: 'client-tools'
 
-      - name: **Autenticarse en el clúster de desarrollo**
-        # NOTA: Esto requerirá configurar secretos de GitHub Actions con las credenciales del clúster de desarrollo.
+      - name: Autenticarse en el clúster
         run: |
-          echo "${{ secrets.K8S_DEV_CONFIG }}" | base64 -d > kubeconfig-dev.yaml
-          export KUBECONFIG=$(pwd)/kubeconfig-dev.yaml
+          echo "${{ secrets['K8S_' + matrix.environment | upper + '_CONFIG'] }}" | base64 -d > kubeconfig-${{ matrix.environment }}.yaml
+          export KUBECONFIG=$(pwd)/kubeconfig-${{ matrix.environment }}.yaml
           kubectl config current-context
 
-      - name: **Desplegar en el entorno de desarrollo**
+      - name: Desplegar en el entorno ${{ matrix.environment }}
         run: |
-          # Ejemplo de despliegue usando kubectl apply. Los archivos YAML de Kubernetes
-          # (deployments, services, etc.) deberían estar en un repositorio o ruta especificada.
-          kubectl apply -f deployments/dev/users-deployment.yaml -n development
-          kubectl apply -f deployments/dev/analytics-deployment.yaml -n development
-          kubectl apply -f deployments/dev/api-gateway-deployment.yaml -n development
-          # ... (aplicar otros archivos de despliegue)
-        # NOTA: Se asume el uso de Kubernetes para el despliegue. Los namespaces y archivos YAML serían específicos de la infraestructura.
+          services=(users analytics api-gateway)
+          for service in "${services[@]}"; do
+            kubectl apply -f deployments/${{ matrix.environment }}/${service}-deployment.yaml -n ${{ matrix.environment }}
+          done
 
-  **deploy_staging:**
-    needs: deploy_dev
-    runs-on: ubuntu-latest
-    environment: staging
-    steps:
-      - name: **Checkout del código**
-        uses: actions/checkout@v3
-
-      - name: **Configurar kubectl**
-        uses: azure/setup-kubectl@v3
-        with:
-          install-location: 'client-tools'
-
-      - name: **Autenticarse en el clúster de staging**
-        run: |
-          echo "${{ secrets.K8S_STAGING_CONFIG }}" | base64 -d > kubeconfig-staging.yaml
-          export KUBECONFIG=$(pwd)/kubeconfig-staging.yaml
-          kubectl config current-context
-
-      - name: **Desplegar en el entorno de staging**
-        run: |
-          kubectl apply -f deployments/staging/users-deployment.yaml -n staging
-          kubectl apply -f deployments/staging/analytics-deployment.yaml -n staging
-          kubectl apply -f deployments/staging/api-gateway-deployment.yaml -n staging
-          # ... (aplicar otros archivos de despliegue)
-
-  **deploy_production:**
-    needs: deploy_staging
-    runs-on: ubuntu-latest
-    environment: production
-    steps:
-      - name: **Checkout del código**
-        uses: actions/checkout@v3
-
-      - name: **Configurar kubectl**
-        uses: azure/setup-kubectl@v3
-        with:
-          install-location: 'client-tools'
-
-      - name: **Autenticarse en el clúster de producción**
-        run: |
-          echo "${{ secrets.K8S_PROD_CONFIG }}" | base64 -d > kubeconfig-prod.yaml
-          export KUBECONFIG=$(pwd)/kubeconfig-prod.yaml
-          kubectl config current-context
-
-      - name: **Aprobar despliegue a producción**
+      - name: Aprobar despliegue a producción
+        if: matrix.environment == 'production'
         run: echo "Es necesario una aprobación manual antes de desplegar a producción."
-
-      - name: **Desplegar en el entorno de producción**
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        run: |
-          kubectl apply -f deployments/prod/users-deployment.yaml -n production
-          kubectl apply -f deployments/prod/analytics-deployment.yaml -n production
-          kubectl apply -f deployments/prod/api-gateway-deployment.yaml -n production
-          # ... (aplicar otros archivos de despliegue)
-        # NOTA: El despliegue a producción podría requerir una aprobación manual o una estrategia de despliegue azul-verde/canario más compleja.
