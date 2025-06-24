@@ -1,4 +1,4 @@
-El repositorio `alphapp.xyz/docs` se encuentra dentro de la organización principal `alphapp`. Este repositorio está destinado específicamente a la **documentación de la API y la plataforma central** de Alphapp.
+El repositorio `alphapp.xyz/docs` se encuentra dentro de la organización principal `alphapx`. Este repositorio está destinado específicamente a la **documentación de la API y la plataforma central** de Alphapp.
 
 Aunque las fuentes describen en detalle el *contenido* que debe incluirse en la documentación de la API y la plataforma, **no proporcionan una estructura de carpetas y archivos explícita y anidada** para *dentro* de este repositorio.
 
