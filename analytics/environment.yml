@@ -1,0 +1,15 @@
+name: analytics_env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  - pandas=2.2.2
+  - tensorflow=2.15.0
+  - matplotlib=3.8.4
+  - seaborn=0.13.2
+  - pytest=8.2.2
+  - pip
+  - pip:
+      - requests==2.31.0
+      - python-dotenv==1.0.1
